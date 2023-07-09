@@ -79,6 +79,10 @@ const GetAllUsers = async () => {
 
  
   const CreateAccount = () => {
+    if (register.value.password !== register.value.confirm_password) {
+      error.value = 'Password and confirm password must be the same';
+      return;
+    }
     const requestOptions = {
       method: 'POST',
       headers: {

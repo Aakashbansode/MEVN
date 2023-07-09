@@ -17,15 +17,30 @@ app.use(function(req, res, next) {
 
 //database stuff
 
-const uri = "mongodb+srv://dbuser:Aakash%40123@cluster0.rroq00f.mongodb.net/?retryWrites=true&w=majority";
-mongoose.connect(uri,{
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-})
-.then(() => {
-    console.log("Mongo DB Connected")
-})
-.catch(err => console.log(err))
+//const uri = "mongodb+srv://dbuser:Aakash%40123@cluster0.rroq00f.mongodb.net/?retryWrites=true&w=majority";
+const uri = "mongodb+srv://dbuser:Aakash%40123@cluster0.rroq00f.mongodb.net/sample_airbnb?retryWrites=true&w=majority";
+
+
+
+// mongoose.connect(uri,{
+//         useNewUrlParser: true,
+//         useUnifiedTopology: true
+// })
+// .then(() => {
+//     console.log("Mongo DB Connected")
+// })
+// .catch(err => console.log(err))
+mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+    .then(() => {
+      console.log("Mongo DB Connected");
+      console.log("Connected to database:", mongoose.connection.name);
+   
+    })
+    .catch(err => console.log(err));
+  
 
 app.use(bodyParser.json())
 
