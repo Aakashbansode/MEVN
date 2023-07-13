@@ -9,8 +9,7 @@ const Airbnb = () => {
       const successMessage = ref('');
 
       const airbnb = 
-        ref({
-        
+        ref({   
           name: '',
         listingsAndReviews: {}
     });
@@ -37,23 +36,33 @@ const Airbnb = () => {
     
    
     
-    const room = ref({
-      
+    const room = ref({   
     });
     
+    // const getspecificroom = async (roomId) => {
+    //   try {
+    //     const response = await axios.get(`http://localhost:3000/users/room/${roomId}`);
+    //     room.value = response.data;
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // };
     const getspecificroom = async (roomId) => {
       try {
-        const response = await axios.get(`http://localhost:3000/users/room/${roomId}`);
-        room.value = response.data;
+        const response = await fetch(`http://localhost:3000/users/room/${roomId}`);
+        if (response.ok) {
+          const data = await response.json();
+          room.value = data;
+          console.log('New room data:', room.value);
+        } else {
+          throw new Error('Failed to fetch room data');
+        }
       } catch (error) {
         console.log(error);
       }
     };
     
     
-
-
-
 
   // Add the CreateAccount function to the module exports
   return { 
@@ -63,8 +72,7 @@ const Airbnb = () => {
     toggleFullDescription,
     getspecificroom,
     room,
-    
- 
+
   }
 }
 export default Airbnb;

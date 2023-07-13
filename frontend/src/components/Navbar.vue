@@ -12,9 +12,6 @@
           <RouterLink to="/" class="text-sm px-2 py-1">Home</RouterLink>  
         </li>
         <li class="inline-block">
-          <RouterLink to="/about" class="text-sm px-2 py-1">About</RouterLink> 
-        </li>
-        <li class="inline-block">
           <RouterLink to="/todos" class="text-sm px-2 py-1">Todos</RouterLink>
         </li>
         <li class="inline-block">

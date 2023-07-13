@@ -2,10 +2,10 @@
   <div>
     <Navbar></Navbar>
     <!-- component -->
-<section class="text-gray-700 body-font overflow-hidden bg-white">
+
   <div class="container px-5 py-24 mx-auto">
     <div class="lg:w-4/5 mx-auto flex flex-wrap">
-      <img alt="ecommerce" class="lg:w-1/2 w-full object-cover object-center rounded border border-gray-200" :src="room.images.picture_url">
+       <img alt="ecommerce" class="lg:w-1/2 w-full object-cover object-center rounded border border-gray-200" :src="room.picture_url">  
       <div class="lg:w-1/2 w-full lg:pl-10 lg:py-6 mt-6 lg:mt-0">
         <h2 class="leading-relaxed">{{ room.access}}</h2>
         <h1 class="text-gray-900 text-3xl title-font font-medium mb-1">{{ room.name}}</h1>
@@ -80,7 +80,7 @@
           </div>
         </div>
         <div class="flex">
-          <span class="title-font font-medium text-2xl text-gray-900">${{ room.price.$numberDecimal }}</span>
+          <span class="title-font font-medium text-2xl text-gray-900">$ {{ room.$numberDecimal }} </span>
           <button class="flex ml-auto text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded">Button</button>
           <button class="rounded-full w-10 h-10 bg-gray-200 p-0 border-0 inline-flex items-center justify-center text-gray-500 ml-4">
             <svg fill="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-5 h-5" viewBox="0 0 24 24">
@@ -91,7 +91,6 @@
       </div>
     </div>
   </div>
-</section>
 <div class="block max-w-sm p-4 mb-8 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
   <img srcset="https://img.icons8.com/?size=2x&amp;id=561&amp;format=png 2x, https://img.icons8.com/?size=1x&amp;id=561&amp;format=png 1x" src="https://img.icons8.com/?size=2x&amp;id=561&amp;format=png 2x" alt="Bed icon" class="w-30 h-30 rounded" />
   <div class="px-6 py-4">
@@ -100,30 +99,54 @@
     </p>
   </div>
 </div>
-</div>
+</div> 
 
 </template>
 
   
-  <script setup>
-  import { onMounted } from 'vue';
-  import { useRoute } from 'vue-router';
-  import Airbnb from '@/modules/Airbnb';
-  import Navbar from '../../components/Navbar.vue';
+<!-- <script setup>
+import { onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import Airbnb from '@/modules/Airbnb';
+import Navbar from '../../components/Navbar.vue';
+
+const { getspecificroom, room } = Airbnb();
+const route = useRoute();
+const roomId = route.params.id;
 
 
-  onMounted(() => {
-  console.log(`the component is now mounted.`);
-  getspecificroom(roomId);
+// Execute the getspecificroom function inside the onMounted hook
+onMounted(async () => {
+  console.log('The component is now mounted.');
+  await getspecificroom(roomId);
+  console.log('Retrieved room:', room.value);
 });
 
+</script> -->
 
-  const { getspecificroom, room } = Airbnb();
-  const route = useRoute();
-  const roomId = route.params.id;
-  
-  
+<script setup>
+import { onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import Airbnb from '@/modules/Airbnb';
+import Navbar from '../../components/Navbar.vue';
+
+const { getspecificroom, room } = Airbnb();
+const route = useRoute();
+const roomId = ref(route.params.id);
+
+// Watch for changes in the room ID
+watch(roomId, async (newRoomId) => {
+  await getspecificroom(newRoomId);
+});
+
+onMounted(async () => {
+  console.log('The component is now mounted.');
+  await getspecificroom(roomId.value);
+});
+</script>
 
 
-  </script>
-  
+
+
+
+

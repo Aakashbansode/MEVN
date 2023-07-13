@@ -6,6 +6,7 @@ import login from '../views/Users/login.vue'
 import RoomDetail from '../views/Rooms/RoomDetail.vue'
 
 
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -41,14 +42,23 @@ const router = createRouter({
     //  component: () => import(/* webpackChunkName: "about" */ '../views/TodoDetail.vue')
     },
     {
-      path: '/user/:id',
+      path: '/todo/:id',
       name: 'todo single',
-      component: UserDetail
+      component: TodoDetail
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
     //  component: () => import(/* webpackChunkName: "about" */ '../views/TodoDetail.vue')
     },
+    // {
+    //   path: '/room/:id',
+    //   name: 'Room Details',
+    //   component: RoomDetail
+    //   // route level code-splitting
+    //   // this generates a separate chunk (about.[hash].js) for this route
+    //   // which is lazy-loaded when the route is visited.
+    // //  component: () => import(/* webpackChunkName: "about" */ '../views/TodoDetail.vue')
+    // },
     {
       path: '/Register',
       name: 'Register',
@@ -88,7 +98,6 @@ const router = createRouter({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-    //  component: () => import(/* webpackChunkName: "about" */ '../views/TodoDetail.vue')
     },
   ]
 })
