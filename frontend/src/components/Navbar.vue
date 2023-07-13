@@ -29,6 +29,9 @@
         <li class="inline-block">
           <RouterLink to="/airbnb" class="text-sm px-2 py-1">Air bnb</RouterLink>
         </li>
+        <li class="inline-block">
+          <RouterLink to="/airbnb" class="text-sm px-2 py-1">Air data</RouterLink>
+        </li>
       </ul>
     </div>
   </div>
