@@ -108,7 +108,7 @@ const GetAllUsers = async () => {
           error.value = '';
           successMessage.value = 'Account created successfully!';
           console.log('Account created:', data);
-          GetAllUsers();
+          router.push('/login');
         }
       })
       .catch(error => {

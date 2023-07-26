@@ -4,6 +4,9 @@ import TodoDetail from '../views/TodoDetail.vue'
 import UserDetail from '../views/Users/UserDetail.vue'
 import login from '../views/Users/login.vue'
 import RoomDetail from '../views/Rooms/RoomDetail.vue'
+import protectedroute from '../views/Users/protectedroute.vue'
+import myorders from '../views/Orders/myorders.vue'
+import Profile from '../views/Profile/Profile.vue'
 
 
 
@@ -98,6 +101,24 @@ const router = createRouter({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
+    },
+    {
+      path: '/protected-route',
+      name: 'protected-route',
+      component: protectedroute,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/myorders',
+      name: 'myorders',
+      component: myorders,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/myprofile',
+      name: 'myprofile',
+      component: Profile,
+      meta: { requiresAuth: true }
     },
   ]
 })

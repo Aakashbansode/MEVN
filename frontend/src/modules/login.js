@@ -8,8 +8,8 @@ const Login = () => {
   });
 
   const route = useRoute();
-    const router = useRouter();
-  
+  const router = useRouter();
+
   const error = ref('');
   const successMessage = ref('');
 
@@ -36,7 +36,12 @@ const Login = () => {
             error.value = '';
             successMessage.value = 'User is logged in successfully!';
             console.log('Valid User:', data);
-            GetAllUsers();
+            console.log('JWT Token:', data.token); // Log the JWT token here
+
+            // Store the token in the local storage
+            localStorage.setItem('jwtToken', data.token);
+
+            router.push('/airbnb');
           }
         })
         .catch(error => {
@@ -46,15 +51,15 @@ const Login = () => {
         });
     } catch (error) {
       console.error(error);
-      error.value = 'There was some issue while logging in';
+      error.value = 'An unexpected error occurred';
       successMessage.value = '';
     }
-  };
 
-  // Accessing the query parameters
-  const queryParams = route.query;
-  login_val.value.email = queryParams.email || '';
-  login_val.value.password = queryParams.password || '';
+    // Accessing the query parameters
+    const queryParams = route.query;
+    login_val.value.email = queryParams.email || '';
+    login_val.value.password = queryParams.password || '';
+  };
 
   return {
     login_val,

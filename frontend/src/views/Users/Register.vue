@@ -37,15 +37,13 @@
                         name="address"
                         placeholder="address"
                          />
-
                     <input v-model="register.email"
-                        type="text"
+                    required type="email"
                         class="block border border-grey-light w-full p-3 rounded mb-4"
                         name="email"
                         placeholder="Email"
                         @blur="checkEmailAvailability" 
                          /> 
-                
                     <input v-model="register.password"
                         type="password"
                         class="block border border-grey-light w-full p-3 rounded mb-4"

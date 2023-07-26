@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
 const bcrypt = require('bcrypt');
+const { v4: uuidv4 } = require('uuid');
+
 
 const userSchema = new mongoose.Schema({
   name: String,
@@ -54,6 +56,7 @@ async function checkEmailExists(email) {
   }
 }
 
+
 async function loginuser(email, password) {
   try {
     const existingUser = await User.findOne({ email });
@@ -73,8 +76,44 @@ async function loginuser(email, password) {
   }
 }
 
+const createSession = async (user) => {
+  const session = {
+    id: uuidv4(), // Generate a session ID using uuidv4()
+    userId: user._id,
+    // ...other session data
+  };
+
+  // Store the session object in your chosen session storage mechanism
+  // For example, you can use the `express-session` middleware to store the session in memory or a database
+  // req.session.sessionId = session.id; // Assuming you have access to `req` object
+
+  return session;
+};
 
 
+
+// // Function to get user by ID
+
+const getUserById = async (userId) => {
+  try {
+    const user = await User.findById(userId).select('-password');
+    return user;
+  } catch (error) {
+    console.error(error);
+    throw new Error('An error occurred while fetching the user details');
+  }
+};
+
+
+const updateUserById = async (userId, updatedUserData) => {
+  try {
+    const user = await User.findByIdAndUpdate(userId, updatedUserData, { new: true });
+    return user;
+  } catch (error) {
+    console.error(error);
+    throw new Error('An error occurred while updating the user details');
+  }
+};
 
 
 module.exports = {
@@ -82,4 +121,7 @@ module.exports = {
   validateUser,
   checkEmailExists,
   loginuser,
+  createSession,
+  getUserById,
+  updateUserById
 };

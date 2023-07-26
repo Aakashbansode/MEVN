@@ -11,7 +11,7 @@ const fetchListingsAndReviews = async () => {
       _id: 1,
     };
     
-    const data = await ListingsAndReviews.find({}, projection).limit(20).toArray();
+    const data = await ListingsAndReviews.find({}, projection).limit(30).toArray();
     //console.log('Fetched data:', data);
     return data;
   } catch (error) {
