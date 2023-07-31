@@ -4,7 +4,7 @@ const authenticateToken = require('../middleware/auth');
 const Order = require('../models/orders');
 const { getUserById } = require('../models/users');
 const { getRoomById } = require('../models/airbnb');
-const { getorders } = require('../models/myorder');
+const { getordersByRoomId } = require('../models/myorder');
 
 router.get('/myorders', authenticateToken, async (req, res) => {
   try {
@@ -37,10 +37,12 @@ router.get('/myorders', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/orders', async (req, res) => {
+router.get('/orders/:roomId', async (req, res) => { // Use :roomId instead of :id
   try {
-    // Fetch all orders from the database
-    const orders = await getorders();
+    const roomId = req.params.roomId; // Use req.params.roomId to get the roomId
+
+    // Fetch all orders for the specified roomId from the database
+    const orders = await getordersByRoomId(roomId);
 
     // Extract the startDate and endDate fields from each order
     const ordersWithDates = orders.map((order) => {

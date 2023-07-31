@@ -12,6 +12,7 @@ const Airbnb = () => {
   });
 
   const showFullDescriptionFlag = ref({});
+  const bookedDates = ref([]);
 
   const toggleFullDescription = (itemId) => {
     showFullDescriptionFlag.value[itemId] = !showFullDescriptionFlag.value[itemId];
@@ -40,17 +41,25 @@ const Airbnb = () => {
       if (response.ok) {
         const data = await response.json();
         room.value = data;
-
+  
         // Check if the user has already booked this room
         const userId = getUserIdFromJWT();
         const userOrders = await getuserorders();
-
+  
         if (userOrders && userOrders.length > 0) {
-          room.value.isBooked = userOrders.some((order) => order.user_details._id === userId && order.room_details._id === roomId);
+          const bookedOrder = userOrders.find((order) => order.user_details._id === userId && order.room_details._id === roomId);
+          if (bookedOrder) {
+            room.value.isBooked = true;
+            bookedDates.value = [bookedOrder.startDate, bookedOrder.endDate];
+          } else {
+            room.value.isBooked = false;
+            bookedDates.value = [];
+          }
         } else {
           room.value.isBooked = false;
+          bookedDates.value = [];
         }
-
+  
         console.log('New room data:', room.value);
       } else {
         throw new Error('Failed to fetch room data');
@@ -59,6 +68,7 @@ const Airbnb = () => {
       console.log(error);
     }
   };
+  
 
   // Function to get the userId from JWT stored in localStorage or sessionStorage
   const getUserIdFromJWT = () => {
@@ -127,13 +137,32 @@ const Airbnb = () => {
     }
   };
 
-  const fetchorders = async () => {
+  const fetchorders = async (roomId, startDate, endDate) => {
     try {
-      const response = await fetch("http://localhost:3000/rooms/orders");
-
+      const url = `http://localhost:3000/rooms/orders/${roomId}`;
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
-        return data.orders;
+  
+        // Filter orders that overlap with the selected startDate and endDate
+        const overlappingOrders = data.orders.filter((order) => {
+          const orderStartDate = new Date(order.startDate).getTime();
+          const orderEndDate = new Date(order.endDate).getTime();
+          const selectedStartDate = new Date(startDate).getTime();
+          const selectedEndDate = new Date(endDate).getTime();
+  
+          // Check for overlapping conditions:
+          // Case 1: Order start date is between selected start and end date
+          // Case 2: Order end date is between selected start and end date
+          // Case 3: Order start date is before the selected start date and end date is after the selected start date
+          return (
+            (orderStartDate >= selectedStartDate && orderStartDate <= selectedEndDate) ||
+            (orderEndDate >= selectedStartDate && orderEndDate <= selectedEndDate) ||
+            (orderStartDate <= selectedStartDate && orderEndDate >= selectedStartDate)
+          );
+        });
+  
+        return overlappingOrders;
       } else {
         throw new Error('Failed to fetch orders');
       }
@@ -142,6 +171,8 @@ const Airbnb = () => {
       throw new Error('An error occurred while fetching orders');
     }
   };
+  
+  
 
   // Add the CreateAccount function to the module exports
   return {

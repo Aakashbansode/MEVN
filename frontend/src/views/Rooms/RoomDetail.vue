@@ -12,7 +12,7 @@
       </svg>
       <span class="sr-only">Info</span>
       <div>
-        <span class="font-medium">Room Already Booked!</span> Please book another room.
+        <span class="font-medium">Room Already Booked! </span> Please book another room.
       </div>
     </div>
     <div class="lg:w-4/5 mx-auto flex flex-wrap justify-center">
@@ -127,8 +127,7 @@
               </div>
             </div>
           </div>
-          <div v-if="room.isBooked">You have already booked this room.</div>
-          <div v-else class="flex">
+          <div class="flex">
             <span v-if="room.price && room.price.$numberDecimal" class="title-font font-medium text-2xl text-gray-900">$
               {{ room.price.$numberDecimal }} </span>
             <button @click="bookRoom"
@@ -175,12 +174,14 @@ import Swal from 'sweetalert2';
 
 
 
-const { getspecificroom, room, bookroom, getuserorders } = Airbnb();
+const { getspecificroom, room, bookroom, getuserorders,fetchorders } = Airbnb();
 const router = useRouter();
 const route = useRoute();
 const roomId = ref(route.params.id);
 const startdate = ref(null);
 const enddate = ref(null);
+
+
 
 
 // Watch for changes in the room ID
@@ -192,6 +193,8 @@ onMounted(async () => {
   console.log('The component is now mounted.');
   await getspecificroom(roomId.value);
 });
+
+
 
 
 const bookRoom = async () => {
@@ -206,9 +209,23 @@ const bookRoom = async () => {
     return;
   }
 
+  // Check if the selected dates are available
   try {
-   
+    const overlappingOrders = await fetchorders(room.value._id,startdate.value, enddate.value);
+    console.log(overlappingOrders);
+    if (overlappingOrders.length > 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'The selected dates are not available. Please select different dates.',
+      });
+      return;
+    }
+
+    // If the selected dates are available, proceed with the booking
+  
     await bookroom(room.value._id,startdate.value, enddate.value);
+
     // Optionally, you can show a success message or navigate to a confirmation page
     Swal.fire({
       icon: 'success',
@@ -226,6 +243,7 @@ const bookRoom = async () => {
     console.error('Error booking room:', error);
   }
 };
+
 
 watch([startdate, enddate], (newValues, oldValues) => {
   const [newStartDate, newEndDate] = newValues;
