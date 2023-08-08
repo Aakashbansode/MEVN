@@ -11,13 +11,12 @@
               <a href="#">
                 <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{{ order.room_details.name }}</h5>
               </a>
-              <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">{{ order.room_details.summary }}</p>
-              <a href="#" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                Read more
-                <svg class="w-3.5 h-3.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
-                </svg>
-              </a>
+              <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">Check In Date: {{ new Date(order.startDate).toLocaleString("en-US", options) }}</p>
+              <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">Check Out Date: {{ new Date(order.endDate).toLocaleString("en-US", options) }}</p>
+              <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">No Of days: {{ getNumberOfDays(order.startDate, order.endDate) }}</p>
+              <v-btn class="text-black bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" @click="cancelBookingConfirmation(order)">
+               Cancel Booking
+              </v-btn>
             </div>
           </div>
         </div>
@@ -32,7 +31,7 @@
 
   <script setup>
   import Order from '../../modules/Orders'
-  import { onMounted, ref } from 'vue'
+  import { onMounted, ref,computed } from 'vue'
   import { useRouter } from 'vue-router'
   import Navbar from '../../components/Navbar.vue'
   
@@ -57,5 +56,50 @@
       }, 5000) // 5000 milliseconds = 5 seconds
     }
   })
+
+  // Define the options for formatting the date
+const options = {
+  year: "numeric",
+  month: "short",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+};
+
+
+const getNumberOfDays = (startDate, endDate) => {
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const timeDifference = end.getTime() - start.getTime();
+    return Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+  }
+  return 0;
+};
+
+
+
+const cancelBookingConfirmation = (order) => {
+  const confirmation = window.confirm(`Are you sure you want to cancel the booking for ${order.room_details.name}?
+Booking Details:
+Check In Date: ${new Date(order.startDate).toLocaleString("en-US", options)}
+Check Out Date: ${new Date(order.endDate).toLocaleString("en-US", options)}
+No Of days: ${getNumberOfDays(order.startDate, order.endDate)}
+`);
+
+  if (confirmation) {
+    sendOTP(order);
+  }
+};
+
+const sendOTP = (order) => {
+  const otp = Math.floor(100000 + Math.random() * 900000);
+  window.alert(`An OTP has been sent to your registered email address.
+Please enter the following OTP to confirm cancellation:
+OTP: ${otp}`);
+};
+
+
   </script>
   

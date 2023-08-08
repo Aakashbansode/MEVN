@@ -123,7 +123,18 @@ const router = createRouter({
   ]
 })
 
-
+// Navigation guard to check authentication status before entering protected routes
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = localStorage.getItem('jwtToken') !== null;
+  
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    // If the route requires authentication and the user is not logged in,
+    // redirect the user to the login page or any other appropriate route.
+    next('/login'); // Replace '/login' with your login page route
+  } else {
+    next();
+  }
+});
 
 
 export default router

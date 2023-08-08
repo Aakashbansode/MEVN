@@ -42,23 +42,8 @@ const Airbnb = () => {
         const data = await response.json();
         room.value = data;
   
-        // Check if the user has already booked this room
-        const userId = getUserIdFromJWT();
-        const userOrders = await getuserorders();
-  
-        if (userOrders && userOrders.length > 0) {
-          const bookedOrder = userOrders.find((order) => order.user_details._id === userId && order.room_details._id === roomId);
-          if (bookedOrder) {
-            room.value.isBooked = true;
-            bookedDates.value = [bookedOrder.startDate, bookedOrder.endDate];
-          } else {
-            room.value.isBooked = false;
-            bookedDates.value = [];
-          }
-        } else {
-          room.value.isBooked = false;
-          bookedDates.value = [];
-        }
+        // Remove the code for checking if the user has already booked this room
+        // room.value.isBooked will not be set in this function anymore
   
         console.log('New room data:', room.value);
       } else {
@@ -68,6 +53,7 @@ const Airbnb = () => {
       console.log(error);
     }
   };
+  
   
 
   // Function to get the userId from JWT stored in localStorage or sessionStorage

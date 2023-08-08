@@ -95,14 +95,7 @@ const { successMessage,error,register, GetAllUsers, CreateAccount, checkEmailAva
 onMounted(() => {
     GetAllUsers()
       })
-
-     
-
     
 const ages = ref(Array.from({ length: 43 }, (_, i) => i + 18)); // Generate an array with ages from 18 to 60
   
-
-
-
-
   </script>

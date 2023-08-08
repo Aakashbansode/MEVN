@@ -128,8 +128,15 @@
             </div>
           </div>
           <div class="flex">
-            <span v-if="room.price && room.price.$numberDecimal" class="title-font font-medium text-2xl text-gray-900">$
-              {{ room.price.$numberDecimal }} </span>
+
+    <!-- Show the updated price when start and end dates are selected -->
+    <span v-if="totalPrice" class="title-font font-medium text-2xl text-gray-900">
+      Updated Price ${{ totalPrice }}
+    </span>
+    <!-- Show the original room price when no dates are selected -->
+    <span v-else-if="room.price && room.price.$numberDecimal" class="title-font font-medium text-2xl text-gray-900">
+      Per Night ${{ room.price.$numberDecimal }}
+    </span>
             <button @click="bookRoom"
               class="flex ml-auto text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded">Book
               Room</button>
@@ -180,6 +187,7 @@ const route = useRoute();
 const roomId = ref(route.params.id);
 const startdate = ref(null);
 const enddate = ref(null);
+const totalPrice = ref(null); // Define totalPrice as a reactive variable
 
 
 
@@ -195,9 +203,29 @@ onMounted(async () => {
 });
 
 
+const isLoggedIn = ref(false);
 
+onMounted(() => {
+  // Check if the JWT token is present in the local storage
+  isLoggedIn.value = checkIfUserIsLoggedIn();
+});
+// Function to check if the user is logged in based on the presence of the JWT token in local storage
+const checkIfUserIsLoggedIn = () => {
+  const jwtToken = localStorage.getItem('jwtToken');
+  return !!jwtToken; // Returns true if the JWT token is present, otherwise false
+};
 
 const bookRoom = async () => {
+
+  // Check if the user is logged in
+  if (!isLoggedIn.value) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Please log in to book a room.',
+    });
+    return;
+  }
   // Check if start date and end date are selected
   if (!startdate.value || !enddate.value) {
     // SweetAlert to display the error message
@@ -324,7 +352,23 @@ watch([startdate, enddate], (newValues, oldValues) => {
 
     console.log('End Date Selected:', newEndDate);
   }
+
+  // Calculate the number of days between selected start date and end date
+  const selectedStartDate = new Date(newStartDate);
+  const selectedEndDate = new Date(newEndDate);
+  const timeDifference = selectedEndDate.getTime() - selectedStartDate.getTime();
+  const numberOfDays = timeDifference / (1000 * 3600 * 24);
+
+  // Assuming that 'room.price.$numberDecimal' contains the price for one night (24hrs)
+  const pricePerNight = parseFloat(room.value.price?.$numberDecimal);
+ // const totalPrice = (pricePerNight * numberOfDays).toFixed(2);
+  totalPrice.value = (pricePerNight * numberOfDays).toFixed(2);
+
+
+  console.log(`Number of days: ${numberOfDays}`);
+  console.log(`Total Price: $${totalPrice}`);
 });
+
 
 
 

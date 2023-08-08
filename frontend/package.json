@@ -12,6 +12,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@mdi/font": "^7.2.96",
     "@vue/devtools-api": "^6.5.0",
     "@vuepic/vue-datepicker": "^5.4.0",
     "axios": "^1.4.0",
@@ -21,7 +22,8 @@
     "vue": "^3.3.4",
     "vue-infinite-scroll": "^2.0.2",
     "vue-lazyload": "^3.0.0",
-    "vue-router": "^4.2.2"
+    "vue-router": "^4.2.2",
+    "vuetify": "^3.3.11"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.2.0",

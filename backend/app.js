@@ -4,6 +4,8 @@ const bodyParser = require("body-parser");
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const expressJwt = require('express-jwt');
 
 // create our express app
 const app = express();
@@ -41,19 +43,42 @@ mongoose.connect(uri, {
 
 app.use(bodyParser.json());
 
+
+
+// Authentication middleware
+const authenticateToken = (req, res, next) => {
+  const token = req.headers['auth-token'];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Unauthorized: Missing token' });
+  }
+
+  jwt.verify(token, 'your_secret_key', (err, user) => {
+    if (err) {
+      return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+    }
+
+    // Make the user object available to subsequent route handlers
+    req.user = user;
+    next();
+  });
+};
+
+
+
 // Routes
 app.get("/", (req, res) => {
   res.send("This is my First home page home page");
 });
 
 const TodosRoute = require('./routes/Todos');
-app.use('/todos', TodosRoute);
+app.use('/todos', authenticateToken,TodosRoute);
 
 const UsersRoute = require('./routes/users');
-app.use('/users', UsersRoute);
+app.use('/users',UsersRoute);
 
 const RoomsRoute = require('./routes/rooms');
-app.use('/rooms', RoomsRoute);
+app.use('/rooms',RoomsRoute);
 
 
 // Start the app

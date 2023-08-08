@@ -16,10 +16,10 @@
         <li class="inline-block">
           <RouterLink to="/users" class="text-sm px-2 py-1">Users</RouterLink>
         </li>
-        <li class="inline-block">
+        <li class="inline-block" v-if="!isLoggedIn">
           <RouterLink to="/Register" class="text-sm px-2 py-1">Register User</RouterLink>
         </li>
-        <li class="inline-block">
+        <li class="inline-block" v-if="!isLoggedIn">
           <RouterLink to="/login" class="text-sm px-2 py-1">Login</RouterLink>
         </li>
         <li class="inline-block">
