@@ -7,8 +7,7 @@ import RoomDetail from '../views/Rooms/RoomDetail.vue'
 import protectedroute from '../views/Users/protectedroute.vue'
 import myorders from '../views/Orders/myorders.vue'
 import Profile from '../views/Profile/Profile.vue'
-
-
+import Unauthorized from '../views/Admin/Unauthorized.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -97,7 +96,8 @@ const router = createRouter({
     {
       path: '/room/:id',
       name: 'rooms details',
-      component: () => import('../views/Rooms/RoomDetail.vue')
+      component: () => import('../views/Rooms/RoomDetail.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'user', 'editor', 'moderator']}
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
@@ -112,29 +112,112 @@ const router = createRouter({
       path: '/myorders',
       name: 'myorders',
       component: myorders,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true, roles: ['admin', 'user', 'editor', 'moderator'] }
     },
     {
       path: '/myprofile',
       name: 'myprofile',
       component: Profile,
+      meta: { requiresAuth: true, roles: ['admin', 'user', 'editor', 'moderator'] }
+    },
+    {
+      path: '/cancel_order/:orderId',
+      name: 'cancel_order',
+      component: () => import('../views/Orders/cancel_order.vue'),
       meta: { requiresAuth: true }
     },
+    {
+      path: '/Admin/home',
+      name: 'adminHome',
+      component: () => import('../views/Admin/adminHome.vue'),
+      meta: { requiresAuth: true, roles: ['admin'] }
+    },
+    {
+      path: '/Admin/users',
+      name: 'adminUsers',
+      component: () => import('../views/Admin/adminUsers.vue'),
+      meta: { requiresAuth: true, roles: ['admin'] }
+    },
+    {
+      path: '/Admin/rooms',
+      name: 'adminRooms',
+      component: () => import('../views/Admin/adminRooms.vue'),
+      meta: { requiresAuth: true, roles: ['admin'] }
+    },
+    {
+      path: '/Admin/users/Edit/:id',
+      name: 'AdminEditUser',
+      component: () => import('../views/Admin/editUser.vue'),
+      meta: { requiresAuth: true, roles: ['admin'] }
+    },
+    {
+      path: '/unauthorized',
+      name: 'unauthorized',
+      component: Unauthorized
+    },  
   ]
 })
 
-// Navigation guard to check authentication status before entering protected routes
-router.beforeEach((to, from, next) => {
+
+
+
+
+
+
+ // Function to get the userId from JWT stored in localStorage or sessionStorage
+ const getUserIdFromJWT = () => {
+  // Implement the logic to retrieve the JWT from localStorage or sessionStorage
+  const jwtToken = localStorage.getItem('jwtToken');
+  // Parse the JWT to get user information
+  const decodedToken = jwtToken ? JSON.parse(atob(jwtToken.split('.')[1])) : null;
+  return decodedToken ? decodedToken.userId : null;
+};
+
+
+router.beforeEach(async (to, from, next) => {
   const isAuthenticated = localStorage.getItem('jwtToken') !== null;
-  
+
   if (to.meta.requiresAuth && !isAuthenticated) {
-    // If the route requires authentication and the user is not logged in,
-    // redirect the user to the login page or any other appropriate route.
-    next('/login'); // Replace '/login' with your login page route
+    next('/login');
+  } else if (to.meta.requiresAuth && isAuthenticated) {
+    const userId = getUserIdFromJWT();
+
+    if (userId) {
+      // Fetch user-specific data including user role
+      const requestOptions = {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+        },
+      };
+
+      try {
+        const userDataResponse = await fetch(`http://localhost:3000/users/${userId}`, requestOptions);
+        const userDataJson = await userDataResponse.json();
+
+        if (userDataResponse.status === 200) {
+          // Check if user's role is allowed to access the route
+          if (to.meta.roles.includes(userDataJson.role)) {
+            next(); // Allow access
+          } else {
+            next('/unauthorized'); // Redirect to unauthorized access page
+          }
+        } else {
+          console.error('Error fetching user data:', userDataResponse.statusText);
+          next('/unauthorized');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        next('/unauthorized');
+      }
+    }
   } else {
     next();
   }
 });
+
+
 
 
 export default router

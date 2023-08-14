@@ -38,8 +38,40 @@ const getordersByRoomId = async (roomId) => {
 };
 
 
+const getUserById = async (userId) => {
+  try {
+    const user = await User.findById(userId).select('-password');
+    return user;
+  } catch (error) {
+    console.error(error);
+    throw new Error('An error occurred while fetching the user details');
+  }
+};
+
+
+const getOrderDetailsByOrderId = async (orderId) => {
+  try {
+    const orderDetails = await Order.findById(orderId);
+    
+    // Manually populate user and room details
+    const user = await getUserById(orderDetails.user_details.userId);
+    const room = await getRoomById(orderDetails.room_details.roomId);
+    
+    orderDetails.user_details.userId = user;
+    orderDetails.room_details.roomId = room;
+    
+    return orderDetails;
+  } catch (error) {
+    console.error('Error fetching order details by order ID:', error);
+    throw new Error('An error occurred while fetching order details');
+  }
+};
+
+
+
 module.exports = {
 
   getRoomById,
   getordersByRoomId,
+  getOrderDetailsByOrderId,
 };

@@ -11,7 +11,20 @@ const userSchema = new mongoose.Schema({
   email: String,
   qualification: String,
   mobile_no: Number,
-  password: String
+  password: String,
+  otp: Number, // Add the otp field here
+  savedRoom: [String], 
+  role: {
+    type: String,
+    enum: ['admin', 'user','moderator','editor'], // Add other roles as needed
+    default: 'user',
+  },// Array to store room IDs
+  status: {
+    type: String,
+    enum: ['active', 'inactive'],
+    default: 'active',
+  },
+
 });
 
 userSchema.pre('save', async function (next) {
@@ -93,16 +106,32 @@ const createSession = async (user) => {
 
 
 // // Function to get user by ID
-
+//users.js
+// const getUserById = async (userId) => {
+//   try {
+//     const user = await User.findById(userId).select('-password');
+//     return user;
+//   } catch (error) {
+//     console.error(error);
+//     throw new Error('An error occurred while fetching the user details');
+//   }
+// };
 const getUserById = async (userId) => {
   try {
-    const user = await User.findById(userId).select('-password');
+    // Fetch user details from the database
+    const user = await User.findOne({ _id: userId });
+
+    if (!user) {
+      throw new Error('User not found.');
+    }
+
     return user;
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching user details:', error);
     throw new Error('An error occurred while fetching the user details');
   }
 };
+
 
 
 const updateUserById = async (userId, updatedUserData) => {

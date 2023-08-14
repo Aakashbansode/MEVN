@@ -92,6 +92,29 @@ const GetSpecificTodo = async () => {
 };
 
 
+const jwtToken = localStorage.getItem('jwtToken');
+
+if (jwtToken) {
+  const tokenParts = jwtToken.split('.');
+  if (tokenParts.length === 3) {
+    const encodedPayload = tokenParts[1];
+    const decodedPayload = JSON.parse(atob(encodedPayload));
+
+    const expirationTimestamp = decodedPayload.exp;
+    const currentTimestamp = Math.floor(Date.now() / 1000); // Get current time in seconds
+
+    if (expirationTimestamp < currentTimestamp) {
+      console.log('Token has expired');
+    } else {
+      console.log('Token is still valid');
+    }
+  } else {
+    console.log('Invalid JWT token format');
+  }
+} else {
+  console.log('JWT token not found');
+}
+
   return {
     todo,
     todoId,

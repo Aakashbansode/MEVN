@@ -45,40 +45,22 @@ app.use(bodyParser.json());
 
 
 
-// Authentication middleware
-const authenticateToken = (req, res, next) => {
-  const token = req.headers['auth-token'];
-
-  if (!token) {
-    return res.status(401).json({ error: 'Unauthorized: Missing token' });
-  }
-
-  jwt.verify(token, 'your_secret_key', (err, user) => {
-    if (err) {
-      return res.status(401).json({ error: 'Unauthorized: Invalid token' });
-    }
-
-    // Make the user object available to subsequent route handlers
-    req.user = user;
-    next();
-  });
-};
-
-
-
 // Routes
 app.get("/", (req, res) => {
   res.send("This is my First home page home page");
 });
 
 const TodosRoute = require('./routes/Todos');
-app.use('/todos', authenticateToken,TodosRoute);
+app.use('/todos',TodosRoute);
 
 const UsersRoute = require('./routes/users');
 app.use('/users',UsersRoute);
 
 const RoomsRoute = require('./routes/rooms');
 app.use('/rooms',RoomsRoute);
+
+const AdminRoute = require('./routes/admin');
+app.use('/admin',AdminRoute);
 
 
 // Start the app

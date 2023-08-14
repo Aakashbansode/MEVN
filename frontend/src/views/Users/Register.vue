@@ -1,17 +1,9 @@
 <template>
     <div>
     <Navbar />
-    <main>
-       
-        <div v-if="error" class="bg-red-500 text-white p-4 text-lg mb-4 text-center">{{ error }}</div>
-<div v-if="successMessage" class="bg-green-500 text-white p-4 text-lg mb-4 text-center">{{ successMessage }}</div>
-
-             
+    <main>              
     <div class="bg-grey-lighter min-h-screen flex flex-col mb-10">
         <div class="container max-w-sm mx-auto flex-1 flex flex-col items-center justify-center px-2 bg-slate-300 border border-gray-700">
-
-                
-
                 <div class="bg-white px-6 py-8 rounded shadow-md text-black w-full bg-slate-200 border-spacing-2">
                     <h1 class="mb-8 text-3xl text-center">Sign up</h1>
                     <input v-model="register.name"
@@ -55,7 +47,6 @@
                         class="block border border-grey-light w-full p-3 rounded mb-4"
                         name="confirm_password"
                         placeholder="Confirm Password" />
-                        <span v-if="error" class="bg-red-500 text-white p-2 text-lg mb-2 text-center">{{ error }}</span>
                     <button @click="CreateAccount"
                         type="submit"
                         class="w-full text-center py-3 rounded bg-blue-500 hover:bg-blue-700 text-white focus:outline-none my-1"

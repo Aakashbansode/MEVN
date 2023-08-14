@@ -22,7 +22,7 @@
               </div>
             </div>
           </div>
-          <!-- Add other filters here... -->
+       Add other filters here
           <div class="mt-4">
             <button @click="handleCloseButtonClick" class="mt-4 px-4 py-2 bg-gray-800 text-white rounded-lg">Close</button>
           </div>
@@ -33,18 +33,22 @@
   </template>
   
   <script setup>
-import { ref, defineProps, defineEmits } from 'vue';
+  import { ref, defineProps, defineEmits } from 'vue';
   
-const { closefilterModal } = defineEmits();
-
-const minPrice = ref(820);
-const maxPrice = ref(3600);
-
-// Function to handle the close button click
-const handleCloseButtonClick = () => {
-  closefilterModal();
-};
-const showFilterModal = ref(true);
-
-</script>
+  const { showFilterModal } = defineProps(['showFilterModal']);
+  const emits = defineEmits();
+  
+  const handleCloseButtonClick = () => {
+    console.log("Closing modal from child component");
+    emits('closefilterModal');
+  };
+  
+  const minPrice = ref(820);
+  const maxPrice = ref(3600);
+  </script>
+  
+  
+  
+  
+  
   

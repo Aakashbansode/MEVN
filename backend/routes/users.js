@@ -14,33 +14,36 @@ const jwt = require('jsonwebtoken');
 const { secretKey } = require('../config.js'); // Replace this with your secret key for JWT
 const authenticateToken = require('../middleware/auth');
 const Order = require('../models/orders');
+const { checkAdminRole, checkUserRole } = require('../middleware/checkRoles');
 
 
 
 
 router.post('/registernewuser', async (req, res) => {
-    const { error } = validateUser(req.body);
-    if (error) {
-      return res.status(400).json({ error: error.details[0].message });
-    }
-  
-    const newUser = new User({
-      name: req.body.name,
-      age: req.body.age,
-      address: req.body.address,
-      email: req.body.email,
-      qualification: req.body.qualification,
-      mobile_no: req.body.mobile_no,
-      password: req.body.password
-    });
-  
-    try {
-      const savedUser = await newUser.save();
-      res.json(savedUser);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to register user.' });
-    }
+  const { error } = validateUser(req.body);
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
+  }
+
+  const newUser = new User({
+    name: req.body.name,
+    age: req.body.age,
+    address: req.body.address,
+    email: req.body.email,
+    qualification: req.body.qualification,
+    mobile_no: req.body.mobile_no,
+    password: req.body.password,
+    role: 'user', // Set the default role to 'user'
   });
+
+  try {
+    const savedUser = await newUser.save();
+    res.json(savedUser);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to register user.' });
+  }
+});
+
 
 
   router.post('/checkusers', async (req, res) => {
@@ -67,7 +70,7 @@ router.post('/registernewuser', async (req, res) => {
       const user = await loginuser(email, password);
   
       // Generate a JWT token for the user
-      const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: '1h' }); // Adjust the expiration time as needed
+      const token = jwt.sign({ userId: user._id }, secretKey, { expiresIn: '24h' }); // Adjust the expiration time as needed
   
       // Omit sensitive information from the logged user object
       const userData = { ...user.toObject() };
@@ -199,6 +202,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+
+// Route to update user data
 router.put('/update/:id', async (req, res) => {
   const userId = req.params.id;
   console.log('Received User ID for Update:', userId);
@@ -216,6 +221,56 @@ router.put('/update/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to update user data.' });
   }
 });
+
+
+// Route to save a room ID in the user's collection
+router.post('/saveroom', authenticateToken, async (req, res) => {
+  const userId = req.userId; // userId is available from the middleware
+
+  try {
+    const { roomId } = req.body;
+
+    // Find the user by userId
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    // Update or add the savedRoom array with the new roomId
+    if (!user.savedRoom) {
+      user.savedRoom = [roomId];
+    } else {
+      if (!user.savedRoom.includes(roomId)) {
+        user.savedRoom.push(roomId);
+      }
+    }
+
+    // Save the updated user document
+    await user.save();
+
+    res.json({ message: 'Room saved successfully.' });
+  } catch (error) {
+    console.error('Error saving room:', error);
+    res.status(500).json({ error: 'There was an issue while saving the room.' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 module.exports = router

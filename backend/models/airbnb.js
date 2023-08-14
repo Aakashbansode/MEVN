@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
+//const { ListingsAndReviews } = ('./listingsandreviews');
 
 // Get a reference to the existing collection without defining a schema
 const ListingsAndReviews = mongoose.connection.collection('listingsAndReviews');
 
-// Function to fetch data from the "listingsAndReviews" collection
+
 const fetchListingsAndReviews = async () => {
   try {
     const projection = {
@@ -11,14 +12,14 @@ const fetchListingsAndReviews = async () => {
       _id: 1,
     };
     
-    const data = await ListingsAndReviews.find({}, projection).limit(50).toArray();
-    //console.log('Fetched data:', data);
+    const data = await ListingsAndReviews.find({}, projection).limit(200).toArray();
     return data;
   } catch (error) {
     console.error(error);
     throw new Error('An error occurred while fetching data');
   }
 };
+
 
 const getRoomById = async (roomId) => {
   try {
@@ -30,8 +31,54 @@ const getRoomById = async (roomId) => {
   }
 };
 
+
+const applyFiltersToData = async (filters) => {
+  const {
+    country,
+    amenities,
+    bedrooms,
+    propertyTypes,
+    roomNames,
+    reviewRange,
+    priceRange,
+  } = filters;
+
+  const query = {};
+
+  if (country) {
+    query.country = country;
+  }
+
+  if (amenities && amenities.length > 0) {
+    query.amenities = { $in: amenities };
+  }
+
+  if (bedrooms && bedrooms.length > 0) {
+    query.bedrooms = { $in: bedrooms };
+  }
+
+  if (propertyTypes && propertyTypes.length > 0) {
+    query.propertyType = { $in: propertyTypes };
+  }
+
+  // Similar logic for other filters
+  console.log('Query:', query);
+  try {
+    const filteredData = await ListingsAndReviews.find(query).limit(200).toArray();
+    console.log('Filtered Data:', filteredData); // Log the filtered data
+    return filteredData;
+  } catch (error) {
+    console.error(error);
+    throw new Error('An error occurred while applying filters');
+  }
+
+};  
+
+
 module.exports = {
   fetchListingsAndReviews,
   ListingsAndReviews,
-  getRoomById
+  getRoomById,
+  applyFiltersToData,
+  
 };

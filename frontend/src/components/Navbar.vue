@@ -34,6 +34,9 @@
         <li class="inline-block" v-if="isLoggedIn">
           <RouterLink to="/myprofile" class="text-sm px-2 py-1">My Profile</RouterLink>
         </li>
+        <li class="inline-block" v-if="isAdmin">
+          <RouterLink to="/Admin/home" class="text-sm px-2 py-1">Admin Panel</RouterLink>
+        </li>
       </ul>  
     </div>
   </div>
@@ -53,18 +56,27 @@
 </template>
 
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import { useRoute , useRouter } from 'vue-router'
-import { ref, onMounted, reactive } from 'vue';
-
+import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import Swal from 'sweetalert2'; // Import SweetAlert library
+import users from '@/modules/users';
 const router = useRouter();
-
+const { getuserdata,userData } = users();
 // You might have a method to check if the user is logged in based on the presence of the JWT token in local storage
 const isLoggedIn = ref(false);
 
-onMounted(() => {
-  // Check if the JWT token is present in the local storage
+const isAdmin = ref(false); // Define isAdmin
+
+
+
+onMounted(async () => {
   isLoggedIn.value = checkIfUserIsLoggedIn();
+  
+  // Wait for the user data to be fetched
+  await getuserdata();
+
+  //Assuming userData.value.role contains the role of the logged-in user
+  isAdmin.value = userData.value.role === 'admin';
 });
 
 // Method to handle the sign-out functionality
@@ -75,8 +87,15 @@ const handleSignOut = () => {
   // Update the "isLoggedIn" variable to hide the "Sign Out" button
   isLoggedIn.value = false;
 
-  // Optionally, you might want to redirect the user to the login page after sign-out
-   router.push('/login');
+  // Show a SweetAlert to inform the user that they have signed out successfully
+  Swal.fire({
+    icon: 'success',
+    title: 'Sign Out',
+    text: 'You have been signed out successfully.',
+  }).then(() => {
+    // Redirect the user to the login page after sign-out
+    router.push('/login');
+  });
 };
 
 // Function to check if the user is logged in based on the presence of the JWT token in local storage
@@ -89,7 +108,6 @@ const checkIfUserIsLoggedIn = () => {
 const removeJWTFromLocalStorage = () => {
   localStorage.removeItem('jwtToken');
 };
-
 
 
 </script>

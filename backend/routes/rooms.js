@@ -5,6 +5,9 @@ const Order = require('../models/orders');
 const { getUserById } = require('../models/users');
 const { getRoomById } = require('../models/airbnb');
 const { getordersByRoomId } = require('../models/myorder');
+const {  User } = require('../models/users');
+const { getOrderDetailsByOrderId } = require('../models/myorder');
+const { applyFiltersToData } = require('../models/airbnb');
 
 router.get('/myorders', authenticateToken, async (req, res) => {
   try {
@@ -58,6 +61,47 @@ router.get('/orders/:roomId', async (req, res) => { // Use :roomId instead of :i
     res.status(500).json({ error: 'An error occurred while fetching orders' });
   }
 });
+
+
+
+
+router.get('/cancel_order/:orderId', authenticateToken, async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+
+    // Fetch order details by order ID from the database
+    const orderDetails = await getOrderDetailsByOrderId(orderId);
+
+    if (!orderDetails) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    res.status(200).json({ order: orderDetails });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while fetching order details' });
+  }
+});
+
+router.post('/filter', async (req, res) => {
+  try {
+    const filters = req.body; // Get the filter payload from the request
+
+    // Apply filters to the data
+    const filteredData = await applyFiltersToData(filters);
+
+    if (!filteredData) {
+      return res.status(404).json({ error: 'No data matching the filters' });
+    }
+
+    res.status(200).json({ airbnb: filteredData });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'An error occurred while filtering the data' });
+  }
+});
+
+
 
 
 module.exports = router;

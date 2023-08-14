@@ -16,25 +16,66 @@
       </div>
     </div>
     <div class="lg:w-4/5 mx-auto flex flex-wrap justify-center">
-  <div class="w-full lg:w-1/3">
-    <label for="startdate" class="block text-sm font-medium text-gray-900">Start Date</label>
-    <div class="flex items-center bg-white rounded-md shadow-sm">
-      <VueDatePicker id="startdate" v-model="startdate" class="w-full px-4 py-2 rounded-md focus:ring-red-500 focus:border-red-500" />
+      <div class="w-full lg:w-1/3">
+        <label for="startdate" class="block text-sm font-medium text-gray-900">Start Date</label>
+        <div class="flex items-center bg-white rounded-md shadow-sm">
+          <VueDatePicker id="startdate" v-model="startdate"
+            class="w-full px-4 py-2 rounded-md focus:ring-red-500 focus:border-red-500" />
+        </div>
+      </div>
+      <div class="w-full lg:w-1/3">
+        <label for="enddate" class="block text-sm font-medium text-gray-900">End Date</label>
+        <div class="flex items-center bg-white rounded-md shadow-sm">
+          <VueDatePicker id="enddate" v-model="enddate"
+            class="w-full px-4 py-2 rounded-md focus:ring-red-500 focus:border-red-500" />
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="w-full lg:w-1/3">
-    <label for="enddate" class="block text-sm font-medium text-gray-900">End Date</label>
-    <div class="flex items-center bg-white rounded-md shadow-sm">
-      <VueDatePicker id="enddate" v-model="enddate" class="w-full px-4 py-2 rounded-md focus:ring-red-500 focus:border-red-500" />
-    </div>
-  </div>
-</div>
-    <div class="lg:w-4/5 mx-auto flex flex-wrap mb-8">    
+    <div class="lg:w-4/5 mx-auto flex flex-wrap mb-8">
       <div class="lg:w-4/5 mx-auto flex flex-wrap mb-8">
         <img v-if="room.images && room.images.picture_url" alt="ecommerce"
           class="lg:w-1/2 w-full object-cover object-center rounded border border-gray-200"
           :src="room.images.picture_url" />
-        <div class="lg:w-1/2 w-full lg:pl-10 lg:py-6 mt-6 lg:mt-0">
+        <div class="lg:w-1/2 w-full lg:pl-10 lg:py-6 mt-6 lg:mt-0 relative">
+          <div class="lg:w-1/2 w-full lg:pl-20 lg:py-6 mt-6 lg:mt-0 relative">
+  <div class="flex items-center">
+    <div class="mr-2">
+      <button @click="saveRoom(room._id)"
+        :class="{
+          'bg-pink-500': isRoomSavedInFavorites, // Change to green for saved rooms
+          'bg-white p-2 rounded-lg shadow-md hover:bg-gray-300 hover:border-black-400 transition duration-300': !isRoomSavedInFavorites,
+          'hover:bg-gray-300 hover:border-black-400 transition duration-300': !isRoomSavedInFavorites
+        }">
+        <div class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            :class="{ 'hover:text-gray-200': !isRoomSavedInFavorites, 'text-gray-200': isRoomSavedInFavorites }"
+            stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+          </svg>
+          <p class="ml-1 text-sm cursor-pointer"
+            :class="{ 'hover:text-gray-200': !isRoomSavedInFavorites, 'text-gray-200': isRoomSavedInFavorites }">
+            Save
+          </p>
+        </div>
+      </button>
+    </div>
+    <div>
+      <button onclick="shareRoom()"
+        class="bg-white p-2 rounded-lg shadow-md hover:bg-gray-300 hover:border-black-400 transition duration-300">
+        <div class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+            stroke="currentColor" class="w-4 h-4 cursor-pointer hover:text-gray-200">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+          </svg>
+          <p class="ml-1 text-sm cursor-pointer hover:text-gray-200">Share</p>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+
           <h2 class="leading-relaxed">{{ room.access }}</h2>
           <h1 class="text-gray-900 text-3xl title-font font-medium mb-1">{{ room.name }}</h1>
           <div class="flex mb-4">
@@ -128,15 +169,15 @@
             </div>
           </div>
           <div class="flex">
-
-    <!-- Show the updated price when start and end dates are selected -->
-    <span v-if="totalPrice" class="title-font font-medium text-2xl text-gray-900">
-      Updated Price ${{ totalPrice }}
-    </span>
-    <!-- Show the original room price when no dates are selected -->
-    <span v-else-if="room.price && room.price.$numberDecimal" class="title-font font-medium text-2xl text-gray-900">
-      Per Night ${{ room.price.$numberDecimal }}
-    </span>
+            <!-- Show the updated price when start and end dates are selected -->
+            <span v-if="totalPrice" class="title-font font-medium text-2xl text-gray-900">
+              Updated Price ${{ totalPrice }}
+            </span>
+            <!-- Show the original room price when no dates are selected -->
+            <span v-else-if="room.price && room.price.$numberDecimal"
+              class="title-font font-medium text-2xl text-gray-900">
+              Per Night ${{ room.price.$numberDecimal }}
+            </span>
             <button @click="bookRoom"
               class="flex ml-auto text-white bg-red-500 border-0 py-2 px-6 focus:outline-none hover:bg-red-600 rounded">Book
               Room</button>
@@ -171,7 +212,7 @@
 
 <script setup>
 
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
 import Airbnb from '@/modules/Airbnb';
 import Navbar from '../../components/Navbar.vue';
 import { useRoute, useRouter } from 'vue-router'
@@ -181,7 +222,7 @@ import Swal from 'sweetalert2';
 
 
 
-const { getspecificroom, room, bookroom, getuserorders,fetchorders } = Airbnb();
+const { getspecificroom, room, bookroom, getuserdata, fetchorders, saveRoom, userData } = Airbnb();
 const router = useRouter();
 const route = useRoute();
 const roomId = ref(route.params.id);
@@ -197,10 +238,10 @@ watch(roomId, async (newRoomId) => {
   await getspecificroom(newRoomId);
 });
 
-onMounted(async () => {
-  console.log('The component is now mounted.');
-  await getspecificroom(roomId.value);
-});
+// onMounted(async () => {
+//   console.log('The component is now mounted.');
+//   await getspecificroom(roomId.value);
+// });
 
 
 const isLoggedIn = ref(false);
@@ -239,7 +280,7 @@ const bookRoom = async () => {
 
   // Check if the selected dates are available
   try {
-    const overlappingOrders = await fetchorders(room.value._id,startdate.value, enddate.value);
+    const overlappingOrders = await fetchorders(room.value._id, startdate.value, enddate.value);
     console.log(overlappingOrders);
     if (overlappingOrders.length > 0) {
       Swal.fire({
@@ -251,8 +292,8 @@ const bookRoom = async () => {
     }
 
     // If the selected dates are available, proceed with the booking
-  
-    await bookroom(room.value._id,startdate.value, enddate.value);
+
+    await bookroom(room.value._id, startdate.value, enddate.value);
 
     // Optionally, you can show a success message or navigate to a confirmation page
     Swal.fire({
@@ -361,7 +402,7 @@ watch([startdate, enddate], (newValues, oldValues) => {
 
   // Assuming that 'room.price.$numberDecimal' contains the price for one night (24hrs)
   const pricePerNight = parseFloat(room.value.price?.$numberDecimal);
- // const totalPrice = (pricePerNight * numberOfDays).toFixed(2);
+  // const totalPrice = (pricePerNight * numberOfDays).toFixed(2);
   totalPrice.value = (pricePerNight * numberOfDays).toFixed(2);
 
 
@@ -370,7 +411,20 @@ watch([startdate, enddate], (newValues, oldValues) => {
 });
 
 
+onMounted(async () => {
+  console.log('The component is now mounted.');
+
+  // Fetch the specific room data
+  await getspecificroom(roomId.value);
+  await getuserdata();
+});
 
 
+const isRoomSavedInFavorites = computed(() => {
+  if (userData.value && userData.value.savedRoom.includes(roomId.value)) {
+    return true;
+  }
+  return false;
+});
 
 </script> 

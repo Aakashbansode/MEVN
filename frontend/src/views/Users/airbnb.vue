@@ -28,20 +28,161 @@
               </div>
             </div>
           </div>
-          <div class="flex flex-col items-center" @click="onFilterButtonClick">
+          <div class="flex flex-col items-center">
             <div class="bg-white p-2 rounded-lg"> 
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                stroke="currentColor" class="w-6 h-6">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
-              </svg>
-            </div>
-            <p class="text-xs text-gray-600 dark:text-gray-200 mt-2">Filter</p>
-            <button @click="onFilterButtonClick" class="px-2 py-2 text-white bg-green-600 rounded-lg">
-              filter heresss
-            </button>
-            <!-- Include the FilterModal component -->
-            <FilterModal v-if="showFilterModal" @closefilterModal="showFilterModal = false" />
+              <div class="text-center">
+  <v-row justify="center">
+    <v-dialog
+      v-model="dialog"
+      persistent
+      width="1024"
+    >
+      <template v-slot:activator="{ props }">
+        <v-btn
+          color="primary"
+          v-bind="props"
+        >
+          Open Filter
+        </v-btn>
+      </template>
+      <v-card>
+        <v-card-title>
+          <span class="text-h5">Filter Rooms</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col
+                cols="12"
+                sm="6"
+                md="4"
+              >
+              <v-select :items="getUniqueCountries" label="Country" v-model="selectedCountry"></v-select>
+              </v-col>
+              <v-col
+                cols="12"
+                sm="6"
+                md="4"
+              >
+              <div>
+    <v-select
+      v-model="selectedAmenities"
+      :items="uniqueAmenities"
+      label="Amenities"
+      multiple
+      chips
+    >
+      <template #selection="{ item, index }">
+        {{ item }}
+        <v-icon small @click="removeAmenity(index)">mdi-close</v-icon>
+      </template>
+    </v-select>
+  </div>
+              </v-col>
+              <v-col
+                cols="12"
+                sm="6"
+                md="4"
+              >
+              <div>
+      <v-range-slider
+      v-model="reviewRange"
+      :min="1"
+      :max="10"
+      step="1"
+      thumb-label
+      label="Review Range"
+      ticks
+    ></v-range-slider>
+  </div>
+              </v-col>
+              <v-col
+      cols="12"
+      sm="6"
+      md="4"
+    >
+    <v-range-slider
+        v-model="priceRange"
+        min="0"
+        max="1000"
+        step="10" 
+        snap-to-step
+        thumb-label
+        label="Price Range"
+      ></v-range-slider>
+    </v-col>
+              <v-col
+                cols="12"
+                sm="6"
+                md="4"
+              >
+              <v-select
+    v-model="selectedBedrooms"
+    :items="bedroomOptions"
+    label="Bedrooms"
+    multiple
+    chips
+  >
+    <template #selection="{ item, index }">
+      {{ item }}
+      <v-icon small @click="removeBedroom(index)">mdi-close</v-icon>
+    </template>
+  </v-select>
+              </v-col>
+              <v-col
+                cols="12"
+                sm="6"
+                md="4"
+              >
+              <v-select
+    v-model="selecteduniquePropertyTypes"
+    :items="uniquePropertyTypes"
+    label="uniquePropertyTypes"
+    multiple
+    chips
+  >
+    <template #selection="{ item, index }">
+      {{ item }}
+      <v-icon small @click="removeuniquePropertyTypes(index)">mdi-close</v-icon>
+    </template>
+  </v-select>
+              </v-col>
+              <v-col
+                cols="12"
+                sm="6"
+                md="4"
+              >
+              <button class="text-sm p-1" @click="clearAllRoomNames">Clear All Selected Names</button>
+              <v-autocomplete
+    v-model="selectedRoomNames"
+    :items="uniqueRoomNames"
+    label="Search by Room Name"
+    multiple
+    chips
+  >
+    <template #selection="{ item, index }">
+      {{ item }}
+      <v-icon small @click="removeRoomName(index)">mdi-close</v-icon>
+    </template> 
+  </v-autocomplete>
+              </v-col>
+            </v-row>
+          </v-container>
+          <v-btn text small class="text-sm p-1 ml-2" @click="resetAllFilters">Reset All</v-btn>
+        </v-card-text>
+        <v-card-actions>
+          <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn color="blue-darken-1" variant="text" @click="dialog = false">Close</v-btn>
+        <v-btn color="blue-darken-1" variant="text" @click="applyFilters">Apply</v-btn>
+        <v-btn color="blue-darken-1" variant="text" @click="resetAllFilters">Reset All</v-btn>
+      </v-card-actions>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-row>
+  </div>
+              </div>
           </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-10 mt-16">
@@ -101,10 +242,15 @@ import Airbnb from '../../modules/Airbnb';
 import Navbar from '../../components/Navbar.vue';
 import Modal from '../../components/Modal.vue';
 import FilterModal from '../../components/FilterModal.vue';
+import PrimaryButton from '../../components/PrimaryButton.vue';
 
-const { GetAll_airbnbdata, airbnb, getspecificroom, room } = Airbnb();
+
+const { priceRange,reviewRange,GetAll_airbnbdata,applyFilters, airbnb, getspecificroom,resetAllFilters,removeRoomName,clearAllRoomNames,selectedCountry,bedroomOptions,selectedBedrooms,removeBedroom,selectedRoomNames,uniqueRoomNames, room,getUniqueCountries,uniqueAmenities,removeAmenity,selectedAmenities,uniquePropertyTypes,selecteduniquePropertyTypes,removeuniquePropertyTypes  } = Airbnb();
+
 
 const showFullDescriptionFlag = reactive({}); // Create a reactive object
+// const priceRange = ref([0, 1000]); // Initial price range
+// const reviewRange = ref([0, 10]); // Initial price range
 
 const getShortenedDescription = (description) => {
   if (description.length > 50) {
@@ -114,20 +260,29 @@ const getShortenedDescription = (description) => {
   }
 };
 
-const onFilterButtonClick = () => {
-  console.log("Button clicked!");
-  showFilterModal.value = !showFilterModal.value;
+
+
+const showFilterModal = ref(false);
+
+const onCloseFilterModal = () => {
+  console.log("Received closefilterModal event. Closing modal...");
+  showFilterModal.value = false;
 };
 
+const onFilterButtonClick = () => {
+  console.log("Button clicked! Opening modal...");
+  showFilterModal.value = true;
+};
 
 const showModal = ref(false);
+const dialog = ref(false);
+
 
 onMounted(() => {
   GetAll_airbnbdata();
 });
 
 
-const showFilterModal = ref(false);// Use reactive instead of ref
 
 
 const openShowMoreModal = (item) => {
@@ -238,6 +393,9 @@ const shiftImages = (direction) => {
     activeIndex.value = Math.min(activeIndex.value + step, totalImages - 7);
   }
 };
+
+
+
 
 </script>
 
