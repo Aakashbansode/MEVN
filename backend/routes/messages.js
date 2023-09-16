@@ -18,14 +18,14 @@ module.exports = (io) => { // Accept io as a parameter here
       // Create a new message document with the sender's ID
       const newMessage = new Message({
         text,
-        sender: req.user.userId, // Use req.user.userId
+        sender: req.user.userId,
         receiver,
       });
   
       await newMessage.save();
   
-      // Emit the new message to all connected clients using Socket.io
-      io.emit('message', newMessage); // Use io here
+      // Emit the new message to the receiver's socket using Socket.io
+      io.to(receiver).emit('new_message', newMessage);
   
       res.status(201).json({ success: true, message: 'Message sent successfully' });
     } catch (error) {
@@ -33,6 +33,7 @@ module.exports = (io) => { // Accept io as a parameter here
       res.status(500).json({ success: false, error: 'Unable to send message' });
     }
   });
+  
   
   
 

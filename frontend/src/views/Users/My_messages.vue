@@ -95,6 +95,7 @@ import { useStore } from 'vuex'
 import Navbar from '../../components/Navbar.vue'
 import { watch } from 'vue'
 import Swal from 'sweetalert2';
+import io from 'socket.io-client';
 
 const store = useStore()
 
@@ -176,45 +177,54 @@ const messageText = ref('')
 const selectedUser = ref(null) // Initialize this with the selected user's ID
 
 const sendMessage = async () => {
-    console.log('Selected User:', selectedUser.value)
-    console.log('Message Text:', messageText.value)
+    console.log('Selected User:', selectedUser.value);
+    console.log('Message Text:', messageText.value);
     try {
-        const response = await fetch('http://localhost:3000/messages/send_message', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${jwtToken.value}` // Include the JWT token in the headers
-            },
-            body: JSON.stringify({
-                text: messageText.value,
-                receiver: selectedUser.value // You should send the receiver's ID here
-            })
-        })
+        // Emit the message to the specific room of the receiver
+        socket.emit('send_message', {
+            text: messageText.value,
+            receiver: selectedUser.value,
+        });
 
-        if (response.ok) {
-            // Message sent successfully, show a success message with SweetAlert
-            console.log('Message sent successfully');
-             // Set showSendMessageDiv to false to hide the message div
-            showSendMessageDiv.value = false;
-            await Swal.fire({
-                icon: 'success',
-                title: 'Message Sent',
-                text: 'Your message has been sent successfully.',
-            });
-        } else {
-            // Handle the case where the message failed to send
-            console.error('Failed to send message');
-        }
+        // Display a success message immediately
+        await Swal.fire({
+            icon: 'success',
+            title: 'Message Sent',
+            text: 'Your message has been sent successfully.',
+        });
+
+        // Clear the message text input
+        messageText.value = '';
+
+        // Set showSendMessageDiv to false to hide the message div
+        showSendMessageDiv.value = false;
     } catch (error) {
         console.error('Error sending message:', error);
     }
-}
+};
+
 
 // Function to get sender's name based on _id
 const getSenderName = (senderId) => {
   const sender = users.value.find((user) => user._id === senderId)
   return sender ? sender.name : 'Unknown Sender'
 }
+
+const socket = io('http://localhost:3000');
+
+socket.on('new_message', (message) => {
+  // Handle the new message event here, e.g., display a notification
+  console.log('New Message Received:', message);
+
+  // You can use a notification library like SweetAlert or create a custom notification
+  // Example using SweetAlert:
+  Swal.fire({
+    icon: 'info',
+    title: 'New Message Received',
+    text: 'You have received a new message.',
+  });
+});
+
 
 </script>
   

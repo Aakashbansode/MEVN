@@ -8,15 +8,23 @@ const jwt = require('jsonwebtoken');
 const expressJwt = require('express-jwt');
 const socketIo = require('socket.io');
 const http = require('http'); // Import the http module
+const corsSocketIO = require('cors'); // Import the cors middleware for Socket.io
+
 
 // Create our express app
 const app = express();
 const server = http.createServer(app); // Create an HTTP server and pass it the express app
-const io = socketIo(server); // Initialize socket.io with the server
+const io = socketIo(server, {
+  cors: {
+    origin: 'http://localhost:5173', // Replace with your frontend's origin
+    methods: ['GET', 'POST'], // Add the methods your frontend will use
+  },
+}); // Initialize socket.io with the server and CORS configuration
 
 app.use(express.json());
 app.use(cors());
 app.use(cookieParser());
+
 
 // Handle CORS + middleware
 app.use(function(req, res, next) {
@@ -75,5 +83,17 @@ server.listen(3000, () => {
 
 io.on('connection', (socket) => {
   console.log('A user connected');
-  // Handle Socket.io events here
+
+  socket.on('send_message', async (data) => {
+      const { text, receiver } = data;
+
+      // Log the sender's socket ID for debugging
+      console.log('Sender Socket ID:', socket.id);
+
+      // Use Socket.io to send the message to the receiver's room
+      socket.to(receiver).emit('new_message', {
+          text,
+          senderSocketId: socket.id, // Optionally, you can include the sender's socket ID
+      });
+  });
 });
