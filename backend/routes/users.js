@@ -15,6 +15,7 @@ const { secretKey } = require('../config.js'); // Replace this with your secret 
 const authenticateToken = require('../middleware/auth');
 const Order = require('../models/orders');
 const { checkAdminRole, checkUserRole } = require('../middleware/checkRoles');
+const Message = require('../models/message'); // Import your message model
 
 
 
@@ -38,11 +39,17 @@ router.post('/registernewuser', async (req, res) => {
 
   try {
     const savedUser = await newUser.save();
-    res.json(savedUser);
+
+    // Generate a JWT token for the user
+    const token = jwt.sign({ userId: savedUser._id }, secretKey, { expiresIn: '1h' });
+
+    // Return the token in the response
+    res.json({ message: 'User registered successfully', token });
   } catch (error) {
     res.status(500).json({ error: 'Failed to register user.' });
   }
 });
+
 
 
 
@@ -255,6 +262,166 @@ router.post('/saveroom', authenticateToken, async (req, res) => {
   }
 });
 
+router.delete('/removeroom', authenticateToken, async (req, res) => {
+  const userId = req.userId; // userId is available from the middleware
+
+  try {
+    const { roomId } = req.body;
+
+    // Find the user by userId
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    // Remove the roomId from savedRoom array
+    user.savedRoom = user.savedRoom.filter(savedRoomId => savedRoomId !== roomId);
+
+    // Save the updated user document
+    await user.save();
+
+    res.json({ message: 'Room removed from favorites successfully.' });
+  } catch (error) {
+    console.error('Error removing room from favorites:', error);
+    res.status(500).json({ error: 'There was an issue while removing the room.' });
+  }
+});
+
+
+
+router.get('/:userId', authenticateToken, async (req, res) => {
+  const userId = req.params.userId; // User ID from the request parameters
+
+  try {
+    // Find the user by userId
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    res.json(user); // Send the user data
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    res.status(500).json({ error: 'There was an issue while fetching user data.' });
+  }
+});
+
+const nodemailer = require('nodemailer');
+
+// Generate OTP
+function generateOTP() {
+  // Generate a random 6-digit OTP (you can change the length as needed)
+  return Math.floor(100000 + Math.random() * 900000);
+}
+
+// Send OTP via email
+// Send OTP via email
+router.post('/sendOTP', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // Generate OTP
+    const otp = generateOTP();
+
+    // Send OTP via email using Nodemailer
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'skytechdataservices@gmail.com',
+        pass: 'vpnl zrwu kktt nhbr'
+      }
+    });
+
+    const mailOptions = {
+      from: 'aakashbansode30@gmail.com',
+      to: email,
+      subject: 'Your OTP Verification Code',
+      text: `Your OTP code is: ${otp}`,
+    };
+
+    // Save the OTP in the user's collection
+    const user = await User.findOneAndUpdate(
+      { email: email },
+      { otp: otp },
+      { new: true } // To get the updated user object
+    );
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    await transporter.sendMail(mailOptions);
+
+    res.json({ success: true, message: 'OTP sent successfully' });
+  } catch (error) {
+    console.error('Error sending OTP via email:', error);
+    res.status(500).json({ success: false, message: 'Failed to send OTP' });
+  }
+});
+
+
+// Verify OTP
+router.post('/verifyOTP', async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    // Find the user by their email
+    const user = await User.findOne({ email: email });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    console.log('Received Email:', email);
+    console.log('Received OTP:', otp);
+    console.log('Stored OTP:', user.otp);
+
+    // Compare the received OTP with the one stored in the user's collection
+    if (otp === user.otp.toString()) {
+      await user.save();
+
+      res.json({ success: true, message: 'OTP verified successfully' });
+    } else {
+      res.status(400).json({ success: false, message: 'Invalid OTP' });
+    }
+  } catch (error) {
+    console.error('Error verifying OTP:', error);
+    res.status(500).json({ success: false, message: 'Failed to verify OTP' });
+  }
+});
+
+
+
+// Create a new message
+
+router.post('/messages', async (req, res) => {
+  try {
+    const newMessage = await Message.create(req.body);
+    
+    // Emit the new message to all connected clients
+    io.emit('message', newMessage);
+
+    res.status(201).json(newMessage);
+  } catch (error) {
+    res.status(500).json({ error: 'Unable to create message' });
+  }
+});
+
+
+// Get all messages
+router.get('/messages', async (req, res) => {
+  try {
+    const messages = await Message.find({});
+    res.status(200).json(messages);
+  } catch (error) {
+    res.status(500).json({ error: 'Unable to fetch messages' });
+  }
+});
+
+
+
+
+module.exports = router;
 
 
 
@@ -265,12 +432,3 @@ router.post('/saveroom', authenticateToken, async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-module.exports = router

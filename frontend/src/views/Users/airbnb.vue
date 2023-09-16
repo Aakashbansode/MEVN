@@ -3,186 +3,104 @@
     <Navbar></Navbar>
     <div class="relative overflow-x-auto">
       <div class="mx-auto container pr-12 pl-12">
-        <div class="flex justify-center mx-auto container max-h-28 overflow-x-auto">
-          <div class="grid grid-cols-9 gap-9 mb-2">
-            <div class="relative">
-              <div
-                class="bg-blue-200 rectangle-full p-2 cursor-pointer absolute left-0 top-1/2 transform -translate-y-1/2">
-                <svg xmlns="http://www.w3.org/2000/svg" @click="shiftImages('left')" fill="none" viewBox="0 0 24 24"
-                  stroke-width="1.5" stroke="currentColor" class="w-6 h-6 cursor-pointer">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                </svg>
-              </div>
-            </div>
-            <div v-for="(img, index) in visibleImages" :key="index">
-              <img class="w-12 h-12 object-contain" :src="img.url" :alt="img.name" />
+        <div class="flex flex-wrap justify-center container max-h-36 overflow-x-auto">
+          <v-row align="center" justify="center" class="mb-2">
+            <v-btn @click="shiftImages('left')" class="mr-4">
+              <v-icon>mdi-chevron-left</v-icon>
+            </v-btn>
+            <v-col v-for="(img, index) in visibleImages" :key="index" cols="auto">
+              <v-img class="w-12 h-12" :src="img.url" :alt="img.name"></v-img>
               <p class="text-xs text-gray-600 dark:text-gray-200 mt-2">{{ img.name }}</p>
-            </div>
-            <div class="relative">
-              <div
-                class="bg-blue-200 rectangle-full p-2 cursor-pointer absolute left-0 top-1/2 transform -translate-y-1/2">
-                <svg xmlns="http://www.w3.org/2000/svg" @click="shiftImages('right')" fill="none" viewBox="0 0 24 24"
-                  stroke-width="1.5" stroke="currentColor" class="w-6 h-6 cursor-pointer">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                </svg>
-              </div>
-            </div>
-          </div>
+            </v-col>
+            <v-btn @click="shiftImages('right')" class="ml-4">
+              <v-icon>mdi-chevron-right</v-icon>
+            </v-btn>
+          </v-row>
           <div class="flex flex-col items-center">
-            <div class="bg-white p-2 rounded-lg"> 
+            <div class="bg-white p-2 rounded-lg">
               <div class="text-center">
-  <v-row justify="center">
-    <v-dialog
-      v-model="dialog"
-      persistent
-      width="1024"
-    >
-      <template v-slot:activator="{ props }">
-        <v-btn
-          color="primary"
-          v-bind="props"
-        >
-          Open Filter
-        </v-btn>
-      </template>
-      <v-card>
-        <v-card-title>
-          <span class="text-h5">Filter Rooms</span>
-        </v-card-title>
-        <v-card-text>
-          <v-container>
-            <v-row>
-              <v-col
-                cols="12"
-                sm="6"
-                md="4"
-              >
-              <v-select :items="getUniqueCountries" label="Country" v-model="selectedCountry"></v-select>
-              </v-col>
-              <v-col
-                cols="12"
-                sm="6"
-                md="4"
-              >
-              <div>
-    <v-select
-      v-model="selectedAmenities"
-      :items="uniqueAmenities"
-      label="Amenities"
-      multiple
-      chips
-    >
-      <template #selection="{ item, index }">
-        {{ item }}
-        <v-icon small @click="removeAmenity(index)">mdi-close</v-icon>
-      </template>
-    </v-select>
-  </div>
-              </v-col>
-              <v-col
-                cols="12"
-                sm="6"
-                md="4"
-              >
-              <div>
-      <v-range-slider
-      v-model="reviewRange"
-      :min="1"
-      :max="10"
-      step="1"
-      thumb-label
-      label="Review Range"
-      ticks
-    ></v-range-slider>
-  </div>
-              </v-col>
-              <v-col
-      cols="12"
-      sm="6"
-      md="4"
-    >
-    <v-range-slider
-        v-model="priceRange"
-        min="0"
-        max="1000"
-        step="10" 
-        snap-to-step
-        thumb-label
-        label="Price Range"
-      ></v-range-slider>
-    </v-col>
-              <v-col
-                cols="12"
-                sm="6"
-                md="4"
-              >
-              <v-select
-    v-model="selectedBedrooms"
-    :items="bedroomOptions"
-    label="Bedrooms"
-    multiple
-    chips
-  >
-    <template #selection="{ item, index }">
-      {{ item }}
-      <v-icon small @click="removeBedroom(index)">mdi-close</v-icon>
-    </template>
-  </v-select>
-              </v-col>
-              <v-col
-                cols="12"
-                sm="6"
-                md="4"
-              >
-              <v-select
-    v-model="selecteduniquePropertyTypes"
-    :items="uniquePropertyTypes"
-    label="uniquePropertyTypes"
-    multiple
-    chips
-  >
-    <template #selection="{ item, index }">
-      {{ item }}
-      <v-icon small @click="removeuniquePropertyTypes(index)">mdi-close</v-icon>
-    </template>
-  </v-select>
-              </v-col>
-              <v-col
-                cols="12"
-                sm="6"
-                md="4"
-              >
-              <button class="text-sm p-1" @click="clearAllRoomNames">Clear All Selected Names</button>
-              <v-autocomplete
-    v-model="selectedRoomNames"
-    :items="uniqueRoomNames"
-    label="Search by Room Name"
-    multiple
-    chips
-  >
-    <template #selection="{ item, index }">
-      {{ item }}
-      <v-icon small @click="removeRoomName(index)">mdi-close</v-icon>
-    </template> 
-  </v-autocomplete>
-              </v-col>
-            </v-row>
-          </v-container>
-          <v-btn text small class="text-sm p-1 ml-2" @click="resetAllFilters">Reset All</v-btn>
-        </v-card-text>
-        <v-card-actions>
-          <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="blue-darken-1" variant="text" @click="dialog = false">Close</v-btn>
-        <v-btn color="blue-darken-1" variant="text" @click="applyFilters">Apply</v-btn>
-        <v-btn color="blue-darken-1" variant="text" @click="resetAllFilters">Reset All</v-btn>
-      </v-card-actions>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-row>
-  </div>
+                <v-row justify="center">
+                  <v-dialog v-model="dialog" persistent width="1024"><template v-slot:activator="{ props }">
+                      <v-btn color="primary" v-bind="props">
+                        Open Filter
+                      </v-btn>
+                    </template>
+                    <v-card>
+                      <v-card-title>
+                        <span class="text-h3">Filter Rooms</span>
+                      </v-card-title>
+                      <v-card-text>
+                        <v-container>
+                          <v-row>
+                            <v-col cols="12" sm="6" md="4">
+                              <v-select :items="getUniqueCountries" label="Country" v-model="selectedCountry"></v-select>
+                            </v-col>
+                            <v-col cols="12" sm="6" md="4">
+                              <div>
+                                <v-select v-model="selectedAmenities" :items="uniqueAmenities" label="Amenities" multiple
+                                  chips>
+                                  <template #selection="{ item, index }">
+                                    {{ item }}
+                                    <v-icon small @click="removeAmenity(index)">mdi-close</v-icon>
+                                  </template>
+                                </v-select>
+                              </div>
+                            </v-col>
+                            <v-col cols="12" sm="6" md="4">
+                              <div>
+                                <v-range-slider v-model="reviewRange" :min="1" :max="10" step="1" thumb-label
+                                  label="Review Range" ticks></v-range-slider>
+                              </div>
+                            </v-col>
+                            <v-col cols="12" sm="6" md="4">
+                              <v-range-slider v-model="priceRange" min="0" max="1000" step="10" snap-to-step thumb-label
+                                label="Price Range"></v-range-slider>
+                            </v-col>
+                            <v-col cols="12" sm="6" md="4">
+                              <v-select v-model="selectedBedrooms" :items="bedroomOptions" label="Bedrooms" multiple
+                                chips>
+                                <template #selection="{ item, index }">
+                                  {{ item }}
+                                  <v-icon small @click="removeBedroom(index)">mdi-close</v-icon>
+                                </template>
+                              </v-select>
+                            </v-col>
+                            <v-col cols="12" sm="6" md="4">
+                              <v-select v-model="selecteduniquePropertyTypes" :items="uniquePropertyTypes"
+                                label="uniquePropertyTypes" multiple chips>
+                                <template #selection="{ item, index }">
+                                  {{ item }}
+                                  <v-icon small @click="removeuniquePropertyTypes(index)">mdi-close</v-icon>
+                                </template>
+                              </v-select>
+                            </v-col>
+                            <v-col cols="12" sm="6" md="4">
+                              <button class="text-sm p-1" @click="clearAllRoomNames">Clear All Selected Names</button>
+                              <v-autocomplete v-model="selectedRoomNames" :items="uniqueRoomNames"
+                                label="Search by Room Name" multiple chips>
+                                <template #selection="{ item, index }">
+                                  {{ item }}
+                                  <v-icon small @click="removeRoomName(index)">mdi-close</v-icon>
+                                </template>
+                              </v-autocomplete>
+                            </v-col>
+                          </v-row>
+                        </v-container>
+                        <v-btn text small class="text-sm p-1 ml-2" @click="resetAllFilters">Reset All</v-btn>
+                      </v-card-text>
+                      <v-card-actions>
+                        <v-card-actions>
+                          <v-spacer></v-spacer>
+                          <v-btn color="blue-darken-1" variant="text" @click="dialog = false">Close</v-btn>
+                          <v-btn color="blue-darken-1" variant="text" @click="applyFilters">Apply</v-btn>
+                          <v-btn color="blue-darken-1" variant="text" @click="resetAllFilters">Reset All</v-btn>
+                        </v-card-actions>
+                      </v-card-actions>
+                    </v-card>
+                  </v-dialog>
+                </v-row>
               </div>
+            </div>
           </div>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-10 mt-16">
@@ -243,9 +161,10 @@ import Navbar from '../../components/Navbar.vue';
 import Modal from '../../components/Modal.vue';
 import FilterModal from '../../components/FilterModal.vue';
 import PrimaryButton from '../../components/PrimaryButton.vue';
+import '@mdi/font/css/materialdesignicons.min.css';
 
 
-const { priceRange,reviewRange,GetAll_airbnbdata,applyFilters, airbnb, getspecificroom,resetAllFilters,removeRoomName,clearAllRoomNames,selectedCountry,bedroomOptions,selectedBedrooms,removeBedroom,selectedRoomNames,uniqueRoomNames, room,getUniqueCountries,uniqueAmenities,removeAmenity,selectedAmenities,uniquePropertyTypes,selecteduniquePropertyTypes,removeuniquePropertyTypes  } = Airbnb();
+const { priceRange, reviewRange, GetAll_airbnbdata, applyFilters, airbnb, getspecificroom, resetAllFilters, removeRoomName, clearAllRoomNames, selectedCountry, bedroomOptions, selectedBedrooms, removeBedroom, selectedRoomNames, uniqueRoomNames, room, getUniqueCountries, uniqueAmenities, removeAmenity, selectedAmenities, uniquePropertyTypes, selecteduniquePropertyTypes, removeuniquePropertyTypes } = Airbnb();
 
 
 const showFullDescriptionFlag = reactive({}); // Create a reactive object
@@ -343,31 +262,31 @@ const imageUrls = [
   },
   {
     url: "https://a0.muscache.com/pictures/3b1eb541-46d9-4bef-abc4-c37d77e3c21b.jpg",
-    name: "Treehouse",
+    name: "1",
   },
   {
     url: "https://a0.muscache.com/pictures/3b1eb541-46d9-4bef-abc4-c37d77e3c21b.jpg",
-    name: "Rooms",
+    name: "2",
   },
   {
     url: "https://a0.muscache.com/pictures/aaa02c2d-9f0d-4c41-878a-68c12ec6c6bd.jpg",
-    name: "CountrySide",
+    name: "3",
   },
   {
     url: "https://a0.muscache.com/pictures/35919456-df89-4024-ad50-5fcb7a472df9.jpg",
-    name: "Historical Homes",
+    name: "4",
   },
   {
     url: "https://a0.muscache.com/pictures/c5a4f6fc-c92c-4ae8-87dd-57f1ff1b89a6.jpg",
-    name: "Castles",
+    name: "5",
   },
   {
     url: "https://a0.muscache.com/pictures/3fb523a0-b622-4368-8142-b5e03df7549b.jpg",
-    name: "Islands",
+    name: "6",
   },
   {
     url: "https://a0.muscache.com/pictures/677a041d-7264-4c45-bb72-52bff21eb6e8.jpg",
-    name: "Camping",
+    name: "7",
   },
 
   // Add the rest of the image URLs here...

@@ -25,9 +25,14 @@ const Airbnb = () => {
     try {
       const response = await fetch("http://localhost:3000/users/airbnbdata");
       if (response.ok) {
-        const data = await response.json();
-        console.log(data); // Log the received data
-        airbnb.value.listingsAndReviews = data;
+        const textData = await response.text(); // Read the response as text
+        if (textData) {
+          const data = JSON.parse(textData); // Attempt to parse the text as JSON
+          console.log(data); // Log the received data
+          airbnb.value.listingsAndReviews = data;
+        } else {
+          console.log('Received empty response');
+        }
       } else {
         throw new Error('Failed to fetch Airbnb data');
       }
@@ -35,6 +40,8 @@ const Airbnb = () => {
       console.log(error);
     }
   };
+  
+  
 
   const getUniqueCountries = computed(() => {
     const countries = new Set();
@@ -246,56 +253,147 @@ const Airbnb = () => {
     }
   };
   
-  const saveRoom = async (roomId) => {
-    try {
-        const userId = getUserIdFromJWT();
+//   const saveRoom = async (roomId) => {
+//     try {
+//         const userId = getUserIdFromJWT();
 
-        if (!userId) {
-            throw new Error('User is not authenticated.');
-        }
+//         if (!userId) {
+//             throw new Error('User is not authenticated.');
+//         }
 
-        const requestOptions = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
-            },
-            body: JSON.stringify({
-                userId: userId,
-                roomId: roomId,
-            }),
-        };
+//         const requestOptions = {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+//             },
+//             body: JSON.stringify({
+//                 userId: userId,
+//                 roomId: roomId,
+//             }),
+//         };
 
-        const response = await fetch('http://localhost:3000/users/saveroom', requestOptions);
-        const data = await response.json();
+//         const response = await fetch('http://localhost:3000/users/saveroom', requestOptions);
+//         const data = await response.json();
 
-        if (response.status === 200) {
-            // Check if the room is already in the user's favorites
-            const isAlreadySaved = userData.value.savedRoom.includes(roomId);
-            if (isAlreadySaved) {
-                Swal.fire({
-                    icon: 'info',
-                    title: 'Info',
-                    text: 'You already have this room in your favorites.',
-                });
-            } else {
-                // Show a success SweetAlert message
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Room has been added to favorites.',
-                });
-            }
+//         if (response.status === 200) {
+//             // Check if the room is already in the user's favorites
+//             const isAlreadySaved = userData.value.savedRoom.includes(roomId);
+//             if (isAlreadySaved) {
+//                 Swal.fire({
+//                     icon: 'info',
+//                     title: 'Info',
+//                     text: 'You already have this room in your favorites.',
+//                 });
+//             } else {
+//                 // Show a success SweetAlert message
+//                 Swal.fire({
+//                     icon: 'success',
+//                     title: 'Success',
+//                     text: 'Room has been added to favorites.',
+//                 });
+//             }
             
-            return data; // Successfully saved the room
-        } else {
-            throw new Error('There was an issue while saving the room.');
-        }
-    } catch (error) {
-        console.error('Error saving room:', error);
-        throw new Error('There was an issue while saving the room.');
+//             return data; // Successfully saved the room
+//         } else {
+//             throw new Error('There was an issue while saving the room.');
+//         }
+//     } catch (error) {
+//         console.error('Error saving room:', error);
+//         throw new Error('There was an issue while saving the room.');
+//     }
+// };
+
+const saveRoom = async (roomId) => {
+  try {
+    const userId = getUserIdFromJWT();
+
+    if (!userId) {
+      throw new Error('User is not authenticated.');
     }
+
+    // Fetch user data including savedRoom
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+      },
+    };
+
+    const userResponse = await fetch(`http://localhost:3000/users/${userId}`, requestOptions);
+    const userData = await userResponse.json();
+
+    if (userData.savedRoom.includes(roomId)) {
+      // Remove room from user's favorites
+      const removeResponse = await fetch('http://localhost:3000/users/removeroom', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+        },
+        body: JSON.stringify({
+          userId: userId,
+          roomId: roomId,
+        }),
+      });
+
+      const removeData = await removeResponse.json();
+    
+      if (removeResponse.status === 200) {
+        // Show a success SweetAlert message for removal
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Room has been removed from favorites.',
+        }).then(() => {
+          // Reload the page
+          location.reload();
+        });
+
+      } else {
+        throw new Error('There was an issue while removing the room.');
+      }
+    } else {
+      // Save the room to user's favorites
+      const saveResponse = await fetch('http://localhost:3000/users/saveroom', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+        },
+        body: JSON.stringify({
+          userId: userId,
+          roomId: roomId,
+        }),
+      });
+
+      const saveData = await saveResponse.json();
+
+      if (saveResponse.status === 200) {
+        // Show a success SweetAlert message for saving
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Room has been added to favorites.',
+        }).then(() => {
+          // Reload the page
+          location.reload();
+        });
+      } else {
+        throw new Error('There was an issue while saving the room.');
+      }
+    }
+
+    return userData; // Updated user data
+  } catch (error) {
+    console.error('Error saving/removing room:', error);
+    throw new Error('There was an issue while saving/removing the room.');
+  }
 };
+
+
+
 
 
   
@@ -328,6 +426,7 @@ const userData = ref(null);// Define a reactive variable to hold user data
       }
     }
   };
+  const dialog = ref(false);
   const priceRange = ref([0, 1000]); // Initial price range
   const reviewRange = ref([0, 10]); // Initial price range
     const applyFilters = async () => {
@@ -342,7 +441,8 @@ const userData = ref(null);// Define a reactive variable to hold user data
           reviewRange: reviewRange,
           priceRange: priceRange,
         };
-    
+        
+
         // Send the payload to the server and fetch data based on filters
         try {
           const response = await fetch('http://localhost:3000/rooms/filter', {
@@ -364,6 +464,7 @@ const userData = ref(null);// Define a reactive variable to hold user data
         }
     
         dialog.value = false; // Close the dialog after applying filters
+        console.log('dialogue:', dialog.value );
       };
  
   // Add the CreateAccount function to the module exports
@@ -398,7 +499,8 @@ const userData = ref(null);// Define a reactive variable to hold user data
     selectedCountry,
     applyFilters,
     priceRange,
-    reviewRange
+    reviewRange,
+    dialog
 
 
     

@@ -6,12 +6,16 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const expressJwt = require('express-jwt');
+const socketIo = require('socket.io');
+const http = require('http'); // Import the http module
 
-// create our express app
+// Create our express app
 const app = express();
+const server = http.createServer(app); // Create an HTTP server and pass it the express app
+const io = socketIo(server); // Initialize socket.io with the server
+
 app.use(express.json());
 app.use(cors());
-
 app.use(cookieParser());
 
 // Handle CORS + middleware
@@ -43,8 +47,6 @@ mongoose.connect(uri, {
 
 app.use(bodyParser.json());
 
-
-
 // Routes
 app.get("/", (req, res) => {
   res.send("This is my First home page home page");
@@ -62,8 +64,16 @@ app.use('/rooms',RoomsRoute);
 const AdminRoute = require('./routes/admin');
 app.use('/admin',AdminRoute);
 
+// Pass the io object to the routes
+const MessagesRoute = require('./routes/messages')(io); // Pass the io object here
+app.use('/messages', MessagesRoute);
 
 // Start the app
-app.listen(3000, () => {
+server.listen(3000, () => {
   console.log("listening at port 3000");
+});
+
+io.on('connection', (socket) => {
+  console.log('A user connected');
+  // Handle Socket.io events here
 });

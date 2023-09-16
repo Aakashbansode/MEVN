@@ -1,4 +1,4 @@
-// backend/models/listingsAndReviews.js
+// backend/models/listingsandReviews.js
 const mongoose = require('mongoose');
 const listingSchema = new mongoose.Schema({
   _id: String,
@@ -92,6 +92,7 @@ const listingSchema = new mongoose.Schema({
   ]
 });
 
-const ListingsAndReviews = mongoose.model('ListingsAndReviews', listingSchema);
+const ListingsAndReviews = mongoose.model('Listingandreview', listingSchema);
+
 
 module.exports = ListingsAndReviews;

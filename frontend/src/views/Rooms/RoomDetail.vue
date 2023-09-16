@@ -10,6 +10,7 @@
         <path
           d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
       </svg>
+      
       <span class="sr-only">Info</span>
       <div>
         <span class="font-medium">Room Already Booked! </span> Please book another room.
@@ -194,6 +195,11 @@
         </div>
       </div>
     </div>
+    <button @click="openYouTubeVideo" class="relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-purple-600 to-blue-500 group-hover:from-purple-600 group-hover:to-blue-500 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800">
+  <span class="relative px-5 py-2.5 transition-all ease-in duration-75 bg-white dark:bg-gray-900 rounded-md group-hover:bg-opacity-0">
+      Click here to watch room video
+  </span>
+</button>
     <div class="flex flex-wrap -mx-2">
       <div v-for="bed in room.beds" :key="bed"
         class="max-w-xs mx-2 p-2 mb-4 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
@@ -232,6 +238,13 @@ const totalPrice = ref(null); // Define totalPrice as a reactive variable
 
 
 
+const openYouTubeVideo = () => {
+  // Define the YouTube video URL
+  const videoUrl = 'https://www.youtube.com/watch?v=oPS-ayK43zI';
+
+  // Open the video URL in a new window or tab
+  window.open(videoUrl, '_blank');
+};
 
 // Watch for changes in the room ID
 watch(roomId, async (newRoomId) => {

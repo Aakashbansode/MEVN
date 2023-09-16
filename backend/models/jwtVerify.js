@@ -14,5 +14,10 @@ function verifyToken(token) {
   }
 }
 
+const user = {
+  email: response.email, // Extracted from Google response
+  name: response.name // Extracted from Google response
+};
+
 module.exports = verifyToken;
 

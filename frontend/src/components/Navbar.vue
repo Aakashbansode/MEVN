@@ -37,6 +37,15 @@
         <li class="inline-block" v-if="isAdmin">
           <RouterLink to="/Admin/home" class="text-sm px-2 py-1">Admin Panel</RouterLink>
         </li>
+        <li class="inline-block">
+          <RouterLink to="/validate_email" v-if="isLoggedIn" class="text-sm px-2 py-1">Email Based Authentication</RouterLink>
+        </li>
+        <li class="inline-block">
+          <RouterLink to="/my_messages" v-if="isLoggedIn" class="text-sm px-2 py-1">My Messages</RouterLink>
+        </li>
+        <li class="inline-block">
+          <RouterLink to="/validate_email" v-if="isLoggedIn" class="text-sm px-2 py-1">Send Messages</RouterLink>
+        </li>
       </ul>  
     </div>
   </div>
@@ -60,7 +69,15 @@ import { useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import Swal from 'sweetalert2'; // Import SweetAlert library
 import users from '@/modules/users';
+import { useStore } from 'vuex'; // Import useStore from vuex
+
+const props = defineProps(['userData','jwtToken']);
+const store = useStore(); // Access the Vuex store
+
+
 const router = useRouter();
+
+
 const { getuserdata,userData } = users();
 // You might have a method to check if the user is logged in based on the presence of the JWT token in local storage
 const isLoggedIn = ref(false);
@@ -70,11 +87,16 @@ const isAdmin = ref(false); // Define isAdmin
 
 
 onMounted(async () => {
+  const jwtToken = localStorage.getItem('jwtToken');
+// Commit the JWT token to Vuex store
+  store.commit('setJwtToken', jwtToken);
+
   isLoggedIn.value = checkIfUserIsLoggedIn();
   
   // Wait for the user data to be fetched
   await getuserdata();
-
+// Dispatch the userData to the Vuex store
+store.commit('setUserData', userData.value);
   //Assuming userData.value.role contains the role of the logged-in user
   isAdmin.value = userData.value.role === 'admin';
 });

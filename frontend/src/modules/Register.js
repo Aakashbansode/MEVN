@@ -97,19 +97,19 @@ const Register = () => {
       
        
 
-const GetAllUsers = async () => {
-    try {
-       await fetch("http://localhost:3000/todos/users")
-      .then(res => res.json())
-      .then(data => {
-        register.value.users = data
-        // debugger
-      })
-    }
-    catch(error) {
-      console.log(error) // do different error to showcase - line 15 wrong name + line13 with incorrect path
-    }
-  }
+// const GetAllUsers = async () => {
+//     try {
+//        await fetch("http://localhost:3000/todos/users")
+//       .then(res => res.json())
+//       .then(data => {
+//         register.value.users = data
+//         // debugger
+//       })
+//     }
+//     catch(error) {
+//       console.log(error) // do different error to showcase - line 15 wrong name + line13 with incorrect path
+//     }
+//   }
 
  
   const CreateAccount = async () => {
@@ -181,7 +181,7 @@ const GetAllUsers = async () => {
   //  todoId,
   //  GetSpecificTodo,
     register,
-    GetAllUsers, 
+   // GetAllUsers, 
     CreateAccount,
     checkEmailAvailability,
   //  deleteTodo,

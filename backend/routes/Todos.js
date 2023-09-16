@@ -59,5 +59,24 @@ router.put('/update/:id', async (req, res) => {
   res.json(tUpdate)
 })
 
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find({});
+    
+    // Omit sensitive information from the user objects, e.g., password
+    const userData = users.map((user) => ({
+      _id: user._id,
+      email: user.email,
+      name: user.name,
+      // Add other fields as needed
+    }));
+
+    res.json(userData);
+  } catch (error) {
+    console.error('Error fetching all user data:', error);
+    res.status(500).json({ error: 'Failed to fetch user data.' });
+  }
+});
+
 
 module.exports = router

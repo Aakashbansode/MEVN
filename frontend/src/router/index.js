@@ -8,6 +8,8 @@ import protectedroute from '../views/Users/protectedroute.vue'
 import myorders from '../views/Orders/myorders.vue'
 import Profile from '../views/Profile/Profile.vue'
 import Unauthorized from '../views/Admin/Unauthorized.vue'
+import My_messages from '../views/Users/My_messages.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -94,6 +96,14 @@ const router = createRouter({
       component: () => import('../views/Users/airbnb.vue')
     },
     {
+      path: '/validate_email',
+      name: 'validate_email',
+      // route level code-splitting
+      // this generates a separate chunk (About.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import('../views/Rooms/validate_email.vue')
+    },
+    {
       path: '/room/:id',
       name: 'rooms details',
       component: () => import('../views/Rooms/RoomDetail.vue'),
@@ -151,10 +161,21 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ['admin'] }
     },
     {
+      path: '/registergoogle',
+      name: 'registergoogle',
+      component: () => import('../views/Users/registergoogle.vue')
+    },
+    {
       path: '/unauthorized',
       name: 'unauthorized',
       component: Unauthorized
-    },  
+    }, 
+    {
+      path: '/my_messages',
+      name: 'my_messages',
+      component: My_messages,
+      meta: { requiresAuth: true, roles: ['admin', 'user', 'editor', 'moderator'] }
+    },
   ]
 })
 
